@@ -1,0 +1,23 @@
+cd /Users/jakubmarczak/python/music-etl-project
+cat > .gitignore << 'EOF'
+# Sensible Daten
+.env
+*.duckdb
+
+# Spotify/Last.fm Rohdaten (persönliche Daten)
+raw_scrobbles.json
+spotify_history/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# dbt
+music_transform/target/
+music_transform/logs/
+music_transform/profiles.yml
+
+# Airflow
+airflow/logs/
+EOF

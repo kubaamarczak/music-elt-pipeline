@@ -1,0 +1,63 @@
+[0m01:10:09.515744 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1078a4340>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108d922b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108d92bb0>]}
+
+
+============================== 01:10:09.518300 | 6a3acfa7-deb2-4a49-be14-3e3cfd925177 ==============================
+[0m01:10:09.518300 [info ] [MainThread]: Running with dbt=1.10.22
+[0m01:10:09.518635 [debug] [MainThread]: running dbt with arguments {'introspect': 'True', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'no_print': 'None', 'log_format': 'default', 'debug': 'False', 'use_experimental_parser': 'False', 'use_colors': 'True', 'profiles_dir': '/Users/jakubmarczak/.dbt', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'static_parser': 'True', 'version_check': 'True', 'log_cache_events': 'False', 'empty': 'None', 'quiet': 'False', 'warn_error': 'None', 'fail_fast': 'False', 'printer_width': '80', 'cache_selected_only': 'False', 'target_path': 'None', 'invocation_command': 'dbt init music_transform', 'log_path': 'logs', 'indirect_selection': 'eager', 'write_json': 'True'}
+[0m01:10:09.526137 [info ] [MainThread]: Creating dbt configuration folder at /Users/jakubmarczak/.dbt
+[0m01:10:09.527290 [debug] [MainThread]: Starter project path: /Users/jakubmarczak/python/music-etl-project/venv/lib/python3.9/site-packages/dbt/include/starter_project
+[0m01:10:09.531321 [info ] [MainThread]: 
+Your new dbt project "music_transform" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m01:10:09.531553 [info ] [MainThread]: Setting up your profile.
+[0m01:10:18.649131 [info ] [MainThread]: Profile music_transform written to /Users/jakubmarczak/.dbt/profiles.yml using target's sample configuration. Once updated, you'll be able to start developing with dbt.
+[0m01:10:18.651498 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 9.180016, "process_in_blocks": "0", "process_kernel_time": 0.14465, "process_mem_max_rss": "116195328", "process_out_blocks": "0", "process_user_time": 0.867617}
+[0m01:10:18.651781 [debug] [MainThread]: Command `dbt init` succeeded at 01:10:18.651723 after 9.18 seconds
+[0m01:10:18.651981 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1078a4340>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10860b160>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108e27d60>]}
+[0m01:10:18.652186 [debug] [MainThread]: Flushing usage events
+[0m01:10:19.251546 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m14:15:36.287787 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x109ad7460>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10afbcf70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10afbc460>]}
+
+
+============================== 14:15:36.290590 | f293840d-5ab5-469d-875d-04bea99afb3d ==============================
+[0m14:15:36.290590 [info ] [MainThread]: Running with dbt=1.10.22
+[0m14:15:36.290957 [debug] [MainThread]: running dbt with arguments {'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'invocation_command': 'dbt run', 'fail_fast': 'False', 'debug': 'False', 'target_path': 'None', 'log_cache_events': 'False', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'printer_width': '80', 'static_parser': 'True', 'version_check': 'True', 'log_format': 'default', 'empty': 'False', 'use_experimental_parser': 'False', 'warn_error': 'None', 'profiles_dir': '/Users/jakubmarczak/.dbt', 'cache_selected_only': 'False', 'introspect': 'True', 'indirect_selection': 'eager', 'use_colors': 'True', 'no_print': 'None', 'write_json': 'True', 'log_path': 'logs'}
+[0m14:15:36.291340 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/jakubmarczak/python/music-etl-project/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m14:15:36.293440 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.055112, "process_in_blocks": "0", "process_kernel_time": 0.136684, "process_mem_max_rss": "98926592", "process_out_blocks": "0", "process_user_time": 0.770003}
+[0m14:15:36.293701 [debug] [MainThread]: Command `dbt run` failed at 14:15:36.293643 after 0.06 seconds
+[0m14:15:36.293917 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x109ad7460>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10afbcb80>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10afbc1c0>]}
+[0m14:15:36.294124 [debug] [MainThread]: Flushing usage events
+[0m14:15:36.945780 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m14:26:46.772897 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10b86b430>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10cd50d00>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10cd50400>]}
+
+
+============================== 14:26:46.775566 | 247a3a7f-493d-495a-a35e-d4502db80c8c ==============================
+[0m14:26:46.775566 [info ] [MainThread]: Running with dbt=1.10.22
+[0m14:26:46.775903 [debug] [MainThread]: running dbt with arguments {'fail_fast': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'use_colors': 'True', 'log_format': 'default', 'use_experimental_parser': 'False', 'send_anonymous_usage_stats': 'True', 'profiles_dir': '/Users/jakubmarczak/.dbt', 'printer_width': '80', 'target_path': 'None', 'cache_selected_only': 'False', 'no_print': 'None', 'invocation_command': 'dbt run', 'introspect': 'True', 'static_parser': 'True', 'empty': 'False', 'write_json': 'True', 'debug': 'False', 'log_cache_events': 'False', 'log_path': 'logs', 'partial_parse': 'True', 'warn_error': 'None', 'version_check': 'True', 'quiet': 'False', 'indirect_selection': 'eager'}
+[0m14:26:46.776240 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/jakubmarczak/python/music-etl-project/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m14:26:46.778085 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.050688416, "process_in_blocks": "0", "process_kernel_time": 0.141593, "process_mem_max_rss": "98664448", "process_out_blocks": "0", "process_user_time": 0.757591}
+[0m14:26:46.778342 [debug] [MainThread]: Command `dbt run` failed at 14:26:46.778288 after 0.05 seconds
+[0m14:26:46.778531 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10b86b430>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10cd50b20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10cd50160>]}
+[0m14:26:46.778719 [debug] [MainThread]: Flushing usage events
+[0m14:26:47.281592 [debug] [MainThread]: An error was encountered while trying to flush usage events
