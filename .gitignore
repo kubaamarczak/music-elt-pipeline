@@ -21,3 +21,4 @@ music_transform/profiles.yml
 # Airflow
 airflow/logs/
 EOF
+airflow/docker-compose.yaml
