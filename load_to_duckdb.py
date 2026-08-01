@@ -1,7 +1,8 @@
 import json
 import duckdb
+import os
 
-con = duckdb.connect("/opt/music-etl-project/music_pipeline.duckdb")
+con = duckdb.connect(os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb"))
 
 # Prüfen ob Tabelle überhaupt schon existiert
 table_exists = con.execute("""
@@ -17,7 +18,7 @@ else:
     last_ts = None
     print("Tabelle existiert noch nicht – lade alles")
 
-with open("/opt/music-etl-project/raw_scrobbles.json", "r") as f:
+with open(os.path.join(os.path.dirname(__file__), "raw_scrobbles.json"), "r") as f:
     tracks = json.load(f)
 
 if not tracks:
