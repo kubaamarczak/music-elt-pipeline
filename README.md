@@ -1,4 +1,4 @@
-# Music Listening Pipeline
+# Music listening pipeline
 
 A personal ELT pipeline that collects, transforms, and visualizes my music listening history from **Last.fm** and **Spotify**. Built as a hands-on data engineering learning project.
 
@@ -6,7 +6,9 @@ A personal ELT pipeline that collects, transforms, and visualizes my music liste
 
 ## Dashboard
 
-<!-- Add screenshot here -->
+![main screen of the dashboard](assets/dashboard_main.png)
+![top artists over time](assets/top_artists.gif)
+![listening activity](assets/listening_activity.gif)
 
 ---
 
@@ -55,7 +57,7 @@ Last.fm API (daily incremental)         Spotify Export (one-time historical)
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 music-etl-project/
@@ -142,7 +144,7 @@ cd ..
 streamlit run dashboard.py
 ```
 
-### 5. Start Airflow (automated daily runs)
+### 5. Start airflow (automated daily runs)
 
 ```bash
 cd airflow
@@ -153,7 +155,7 @@ Then open [http://localhost:8080](http://localhost:8080) (login: `airflow` / `ai
 
 ---
 
-## dbt Models
+## dbt models
 
 ### Staging
 - **`stg_scrobbles`** — Combines and cleans raw Last.fm and Spotify data into a unified view. Filters out skipped tracks and now-playing entries without timestamps.
@@ -165,10 +167,15 @@ Then open [http://localhost:8080](http://localhost:8080) (login: `airflow` / `ai
 
 ---
 
-## Key Concepts Practiced
+## Key concepts practiced
 
 - **Incremental loading** — Only fetching new scrobbles since the last run using Last.fm's `from` timestamp parameter
 - **ELT pattern** — Raw data lands in DuckDB first, transformations happen after
 - **dbt source testing** — `not_null` and `unique` tests on staging models
 - **Multi-source integration** — Combining API data (Last.fm) with file exports (Spotify)
 - **Orchestration** — Dockerized Airflow DAG with task dependencies
+
+## Additional footage
+![artist popularity](assets/artist_popularity.gif)
+![heatmap](assets/heatmap.png)
+
