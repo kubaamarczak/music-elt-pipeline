@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests python-dotenv duckdb pandas dbt-core dbt-duckdb streamlit plotly ruff
+
+      - name: Lint Python
+        run: ruff check .
+
+      # Syntax-Check der Kern-Skripte. Faengt kaputte Refactorings ab,
+      # ohne echte Last.fm/Spotify-Credentials zu brauchen.
+      - name: Byte-compile core scripts
+        run: |
+          python -m py_compile extract.py load_to_duckdb.py load_spotify.py dashboard.py
+          python -m py_compile airflow/dags/music_pipeline_dag.py
+
+      # Wegwerf-DuckDB-Profil, keine echten Daten/Secrets noetig.
+      - name: Configure throwaway dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+          music_transform:
+            target: ci
+            outputs:
+              ci:
+                type: duckdb
+                path: /tmp/ci.duckdb
+                schema: main
+          EOF
+
+      # dbt parse validiert Jinja/SQL/YAML-Syntax und ref()/source()-Aufloesung
+      # der Modelle, ohne dass echte Rohdaten vorhanden sein muessen.
+      - name: dbt parse
+        working-directory: music_transform
+        run: |
+          dbt deps || true
+          dbt parse --target ci
