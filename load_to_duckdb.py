@@ -1,6 +1,8 @@
 import json
-import duckdb
 import os
+import sys
+
+import duckdb
 
 con = duckdb.connect(os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb"))
 
@@ -24,7 +26,7 @@ with open(os.path.join(os.path.dirname(__file__), "raw_scrobbles.json"), "r") as
 if not tracks:
     print("Keine neuen Tracks")
     con.close()
-    exit()
+    sys.exit()
 
 if table_exists:
     con.execute("""

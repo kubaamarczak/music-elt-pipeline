@@ -1,6 +1,9 @@
-from datetime import datetime, timedelta
-from airflow import DAG
+from datetime import timedelta
+
+import pendulum
 from airflow.operators.bash import BashOperator
+
+from airflow import DAG
 
 PROJECT_DIR = "/opt/music-etl-project"
 
@@ -15,7 +18,7 @@ with DAG(
     default_args=default_args,
     description="Täglicher Extract → Load → Transform der Last.fm Scrobbles",
     schedule="0 8 * * *",
-    start_date=datetime(2026, 7, 28),
+    start_date=pendulum.datetime(2026, 7, 28, tz="UTC"),
     catchup=False,
 ) as dag:
 

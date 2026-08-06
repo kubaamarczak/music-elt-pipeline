@@ -1,7 +1,7 @@
+
 import duckdb
-import streamlit as st
 import plotly.express as px
-from datetime import date
+import streamlit as st
 
 con = duckdb.connect("/Users/jakubmarczak/python/music-etl-project/music_pipeline.duckdb")
 
