@@ -101,7 +101,7 @@ music-etl-project/
 ### 1. Clone & install dependencies
 
 ```bash
-git clone https://github.com/kubaamarczak/music-etl-project
+git clone https://github.com/kubaamarczak/music-elt-pipeline
 cd music-etl-project
 python -m venv venv
 source venv/bin/activate
