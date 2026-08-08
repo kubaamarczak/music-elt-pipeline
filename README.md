@@ -102,7 +102,7 @@ music-etl-project/
 
 ```bash
 git clone https://github.com/kubaamarczak/music-elt-pipeline
-cd music-etl-project
+cd music-elt-pipeline
 python -m venv venv
 source venv/bin/activate
 pip install requests python-dotenv duckdb pandas dbt-core dbt-duckdb streamlit plotly
