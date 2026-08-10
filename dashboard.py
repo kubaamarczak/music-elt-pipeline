@@ -1,22 +1,10 @@
-import duckdb
 import plotly.express as px
 import streamlit as st
 from huggingface_hub import hf_hub_download
+import duckdb
 
 @st.cache_resource(show_spinner="Loading database…")
 def get_connection():
-    """
-    Downloads the DuckDB file from a private Hugging Face dataset repo
-    (cached locally by huggingface_hub between reruns/restarts) and opens
-    a read-only DuckDB connection to it.
-
-    Requires the following entries in Streamlit secrets
-    (Manage app -> Settings -> Secrets on Streamlit Cloud, or
-    .streamlit/secrets.toml locally):
-
-        HF_TOKEN = "hf_xxx..."
-        HF_REPO_ID = "your-username/music-pipeline-db"
-    """
     db_path = hf_hub_download(
         repo_id=st.secrets["HF_REPO_ID"],
         repo_type="dataset",
@@ -381,5 +369,3 @@ with st.container(border=True):
     )
 
     st.plotly_chart(fig5, use_container_width=True)
-    
-con.close()
