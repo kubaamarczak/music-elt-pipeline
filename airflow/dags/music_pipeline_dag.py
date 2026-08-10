@@ -46,7 +46,15 @@ with DAG(
 
     upload = BashOperator(
         task_id="upload_to_hf",
-        bash_command=f"pip install huggingface_hub python-dotenv --quiet && cd {PROJECT_DIR} && python upload_db_to_hf.py",
+        bash_command=(
+            'if [ -z "$HF_TOKEN" ] || [ -z "$HF_REPO_ID" ]; then '
+            'echo "HF_TOKEN/HF_REPO_ID nicht gesetzt -- Hugging-Face-Upload wird '
+            'uebersprungen (nur fuer eigenes Public-Deployment noetig, siehe SETUP_HF.md)."; '
+            "exit 0; "
+            "fi && "
+            f"pip install huggingface_hub python-dotenv --quiet && "
+            f"cd {PROJECT_DIR} && python upload_db_to_hf.py"
+        ),
     )
 
     extract >> load >> transform >> upload
