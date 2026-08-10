@@ -1,7 +1,6 @@
 import duckdb
 import plotly.express as px
 import streamlit as st
-from dateutil.relativedelta import relativedelta
 from huggingface_hub import hf_hub_download
 
 
