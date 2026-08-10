@@ -6,6 +6,17 @@ import duckdb
 
 con = duckdb.connect(os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb"))
 
+con.execute("""
+    CREATE TABLE IF NOT EXISTS raw_spotify (
+        artist_name     VARCHAR,
+        track_name      VARCHAR,
+        ms_played       BIGINT,
+        seconds_played  BIGINT,
+        played_at       TIMESTAMP,
+        played_date     DATE
+    )
+""")
+
 # Prüfen ob Tabelle überhaupt schon existiert
 table_exists = con.execute("""
     SELECT COUNT(*) FROM information_schema.tables 

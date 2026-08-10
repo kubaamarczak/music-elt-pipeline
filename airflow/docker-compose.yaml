@@ -29,6 +29,17 @@
 #                                Default: 50000
 # AIRFLOW_PROJ_DIR             - Base path to which all the files will be volumed.
 #                                Default: .
+# MUSIC_ETL_PROJECT_DIR         - Path to the music-etl-project repo root (the folder
+#                                containing extract.py, load_to_duckdb.py, dashboard.py,
+#                                music_pipeline.duckdb, music_transform/, ...), mounted
+#                                into the Airflow containers so the DAG tasks can run the
+#                                pipeline scripts.
+#                                Default: .. (assumes docker-compose.yaml lives in
+#                                <repo-root>/airflow/, i.e. you run `docker compose up`
+#                                from inside the airflow/ folder of a normal clone).
+#                                Override in a .env file next to this docker-compose.yaml
+#                                if your layout differs, e.g.:
+#                                    MUSIC_ETL_PROJECT_DIR=/absolute/path/to/music-etl-project
 # Those configurations are useful mostly in case of standalone testing/running Airflow in test/try-out mode
 #
 # _AIRFLOW_WWW_USER_USERNAME   - Username for the administrator account (if requested).
@@ -81,7 +92,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - /Users/jakubmarczak/python/music-etl-project:/opt/music-etl-project
+    - ${MUSIC_ETL_PROJECT_DIR:-..}:/opt/music-etl-project
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on

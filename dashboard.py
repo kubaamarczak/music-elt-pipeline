@@ -1,11 +1,19 @@
+import os
+
 import duckdb
 import plotly.express as px
 import streamlit as st
-from huggingface_hub import hf_hub_download
 
+
+LOCAL_DB_PATH = os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb")
 
 @st.cache_resource(show_spinner="Loading database…", ttl="1h")
 def get_connection():
+    if os.path.exists(LOCAL_DB_PATH):
+     return duckdb.connect(LOCAL_DB_PATH, read_only=True)
+
+    from huggingface_hub import hf_hub_download
+    
     db_path = hf_hub_download(
         repo_id=st.secrets["HF_REPO_ID"],
         repo_type="dataset",
