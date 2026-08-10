@@ -195,18 +195,11 @@ with st.container(border=True):
         index=day_order, columns=range(24), fill_value=0
     )
 
-    heatmap_total = heatmap_pivot.values.sum()
-    heatmap_pct = (heatmap_pivot / heatmap_total * 100) if heatmap_total else heatmap_pivot * 0
-
     fig3 = px.imshow(
         heatmap_pivot,
         labels={"x": "Time", "y": "Day", "color": "Plays"},
         color_continuous_scale=["#0f1117", "#131386", "#3b3bd7", "#2979ff", "#64b5f6"],
         aspect="equal"
-    )
-    fig3.update_traces(
-        customdata=heatmap_pct.values,
-        hovertemplate="%{y}, %{x}:00<br>Plays: %{z}<br>Anteil: %{customdata:.1f}%<extra></extra>"
     )
     fig3.update_xaxes(
         tickvals=list(range(24)),
