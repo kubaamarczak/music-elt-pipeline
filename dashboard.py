@@ -184,7 +184,7 @@ with st.container(border=True):
     # Wochentage in richtiger Reihenfolge
     day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     heatmap_pivot = heatmap_pivot.reindex(
-        [d for d in day_order if d in heatmap_pivot.index]
+        index=day_order, columns=range(24), fill_value=0
     )
 
     fig3 = px.imshow(
