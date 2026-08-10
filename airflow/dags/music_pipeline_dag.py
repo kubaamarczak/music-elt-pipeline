@@ -34,7 +34,12 @@ with DAG(
 
     transform = BashOperator(
         task_id="transform",
-        bash_command=f"pip install dbt-core dbt-duckdb --quiet && cd {PROJECT_DIR}/music_transform && dbt run --profiles-dir {PROJECT_DIR}/music_transform",
+        bash_command=(
+            f"pip install dbt-core dbt-duckdb --quiet && "
+            f'export PATH="$HOME/.local/bin:$PATH" && '
+            f"cd {PROJECT_DIR}/music_transform && "
+            f"dbt run --profiles-dir {PROJECT_DIR}/music_transform"
+        ),
         env={"DUCKDB_PATH": "/opt/music-etl-project/music_pipeline.duckdb"},
     )
 
