@@ -23,6 +23,10 @@ st.title("Music listening dashboard")
 # --- Sidebar Filter ---
 st.sidebar.header("Filter")
 
+if st.sidebar.button("Reload data"):
+    get_connection.clear()
+    st.rerun()
+
 min_date, max_date = con.execute("""
     SELECT MIN(played_date), MAX(played_date) FROM stg_scrobbles
 """).fetchone()
