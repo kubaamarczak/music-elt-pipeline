@@ -41,6 +41,7 @@ with DAG(
             f"dbt run --profiles-dir {PROJECT_DIR}/music_transform"
         ),
         env={"DUCKDB_PATH": "/opt/music-etl-project/music_pipeline.duckdb"},
+        append_env=True,
     )
 
     upload = BashOperator(
