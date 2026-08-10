@@ -4,7 +4,7 @@ import streamlit as st
 from huggingface_hub import hf_hub_download
 
 
-@st.cache_resource(show_spinner="Loading database…")
+@st.cache_resource(show_spinner="Loading database…", ttl="1h")
 def get_connection():
     db_path = hf_hub_download(
         repo_id=st.secrets["HF_REPO_ID"],
