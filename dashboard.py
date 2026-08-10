@@ -1,7 +1,8 @@
+import duckdb
 import plotly.express as px
 import streamlit as st
 from huggingface_hub import hf_hub_download
-import duckdb
+
 
 @st.cache_resource(show_spinner="Loading database…")
 def get_connection():
