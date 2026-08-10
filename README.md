@@ -158,7 +158,7 @@ streamlit run dashboard.py
 ```bash
 cd airflow
 # mkdir -p logs plugins config     # on setup only
-# echo "AIRFLOW_UID=$(id -u)" > .env.    # on setup only
+# echo "AIRFLOW_UID=$(id -u)" > .env     # on setup only
 docker compose up -d
 ```
 
