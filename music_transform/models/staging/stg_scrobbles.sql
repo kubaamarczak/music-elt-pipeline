@@ -1,13 +1,15 @@
+{{ config(materialized='table') }}
+
 WITH lastfm AS (
     SELECT
         track_name,
         artist_name,
         album_name,
         played_at_ts,
-        TO_TIMESTAMP(played_at_ts)                      AS played_at,
-        DATE_TRUNC('day', TO_TIMESTAMP(played_at_ts))   AS played_date,
-        NULL::BIGINT                                     AS ms_played,
-        'lastfm'                                         AS source
+        TO_TIMESTAMP(played_at_ts) AT TIME ZONE 'Europe/Berlin'                     AS played_at,
+        DATE_TRUNC('day', TO_TIMESTAMP(played_at_ts) AT TIME ZONE 'Europe/Berlin')  AS played_date,
+        NULL::BIGINT                                                                AS ms_played,
+        'lastfm'                                                                    AS source
     FROM {{ source('main', 'raw_scrobbles') }}
     WHERE played_at_ts IS NOT NULL
 ),
