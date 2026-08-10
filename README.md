@@ -95,7 +95,7 @@ music-etl-project/
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.11+
 - Docker Desktop
 - A [Last.fm account](https://www.last.fm) with scrobbling enabled
 - A Last.fm API key ([apply here](https://www.last.fm/api/account/create))
@@ -107,7 +107,7 @@ git clone https://github.com/kubaamarczak/music-elt-pipeline
 cd music-elt-pipeline
 python -m venv venv
 source venv/bin/activate
-pip install requests python-dotenv duckdb pandas dbt-core dbt-duckdb streamlit plotly
+pip install -r requirements.txt
 ```
 
 ### 2. Configure environment
@@ -121,7 +121,7 @@ LASTFM_USERNAME=your_lastfm_username
 
 ### 3. Configure dbt
 
-Create `~/.dbt/profiles.yml`:
+Create `music_transform/profiles.yml`:
 
 ```yaml
 music_transform:
@@ -129,7 +129,7 @@ music_transform:
   outputs:
     dev:
       type: duckdb
-      path: /absolute/path/to/music_pipeline.duckdb
+      path: ~/music-elt-pipeline/music_pipeline.duckdb
       schema: main
 ```
 
