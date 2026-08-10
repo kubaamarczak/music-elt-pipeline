@@ -102,6 +102,8 @@ top_tracks = con.execute(f"""
 """).fetchdf()
 top_tracks.index = top_tracks.index + 1
 
+top_tracks["Share"] = (top_tracks["Plays"] / total_plays * 100) if total_plays else 0.0
+
 with st.container(border=True): 
     col1, col2 = st.columns(2)
     with col1:
@@ -110,7 +112,13 @@ with st.container(border=True):
 
     with col2:
         st.header("Top tracks")
-        st.dataframe(top_tracks, use_container_width=True)
+        st.dataframe(
+            top_tracks,
+            use_container_width=True,
+            column_config={
+                "Share": st.column_config.NumberColumn("Share", format="%.1f%%"),
+            },
+        )
 
 # --- Listening Activity ---
 with st.container(border=True): 
@@ -187,11 +195,18 @@ with st.container(border=True):
         index=day_order, columns=range(24), fill_value=0
     )
 
+    heatmap_total = heatmap_pivot.values.sum()
+    heatmap_pct = (heatmap_pivot / heatmap_total * 100) if heatmap_total else heatmap_pivot * 0
+
     fig3 = px.imshow(
         heatmap_pivot,
         labels={"x": "Time", "y": "Day", "color": "Plays"},
         color_continuous_scale=["#0f1117", "#131386", "#3b3bd7", "#2979ff", "#64b5f6"],
         aspect="equal"
+    )
+    fig3.update_traces(
+        customdata=heatmap_pct.values,
+        hovertemplate="%{y}, %{x}:00<br>Plays: %{z}<br>Anteil: %{customdata:.1f}%<extra></extra>"
     )
     fig3.update_xaxes(
         tickvals=list(range(24)),
