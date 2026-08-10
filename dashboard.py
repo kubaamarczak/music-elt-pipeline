@@ -32,18 +32,6 @@ min_date, max_date = con.execute("""
     SELECT MIN(played_date), MAX(played_date) FROM stg_scrobbles
 """).fetchone()
 
-if "date_range" not in st.session_state:
-    st.session_state["date_range"] = (min_date, max_date)
- 
-st.sidebar.caption("Quick select")
-quick_col1, quick_col2, quick_col3 = st.sidebar.columns(3)
-if quick_col1.button("Last week", use_container_width=True):
-    st.session_state["date_range"] = (max(min_date, max_date - relativedelta(weeks=1)), max_date)
-if quick_col2.button("Last month", use_container_width=True):
-    st.session_state["date_range"] = (max(min_date, max_date - relativedelta(months=1)), max_date)
-if quick_col3.button("Last year", use_container_width=True):
-    st.session_state["date_range"] = (max(min_date, max_date - relativedelta(years=1)), max_date)
-
 date_range = st.sidebar.date_input(
     "Time range",
     value=(min_date, max_date),
@@ -51,7 +39,6 @@ date_range = st.sidebar.date_input(
     max_value=max_date
 )
 
-# Sicherheitscheck falls nur ein Datum ausgewählt
 if len(date_range) == 2:
     start_date, end_date = date_range
 else:
