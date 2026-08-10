@@ -129,7 +129,7 @@ music_transform:
   outputs:
     dev:
       type: duckdb
-      path: ~/music-elt-pipeline/music_pipeline.duckdb
+      path: ../music_pipeline.duckdb
       schema: main
 ```
 
