@@ -1,8 +1,6 @@
 from datetime import timedelta
-
 import pendulum
 from airflow.operators.bash import BashOperator
-
 from airflow import DAG
 
 PROJECT_DIR = "/opt/music-etl-project"
@@ -38,4 +36,9 @@ with DAG(
         env={"DUCKDB_PATH": "/opt/music-etl-project/music_pipeline.duckdb"},
     )
 
-    extract >> load >> transform
+    upload = BashOperator(
+        task_id="upload_to_hf",
+        bash_command=f"pip install huggingface_hub python-dotenv --quiet && cd {PROJECT_DIR} && python upload_db_to_hf.py",
+    )
+
+    extract >> load >> transform >> upload
