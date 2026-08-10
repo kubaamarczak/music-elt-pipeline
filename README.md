@@ -1,11 +1,11 @@
 # Music listening pipeline
 
+[![CI](https://github.com/kubaamarczak/music-elt-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/kubaamarczak/music-elt-pipeline/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![Airflow](https://img.shields.io/badge/Airflow-2.9-017CEE?logo=apacheairflow&logoColor=white)
+![Airflow](https://img.shields.io/badge/Airflow-3.3-017CEE?logo=apacheairflow&logoColor=white)
 ![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?logo=duckdb&logoColor=black)
 ![dbt](https://img.shields.io/badge/dbt-FF694B?logo=dbt&logoColor=white)
 ![Last.fm](https://img.shields.io/badge/Last.fm-D51007?logo=lastdotfm&logoColor=white)
-
 
 A personal ELT pipeline that collects, transforms, and visualizes my music listening history from **Last.fm** and **Spotify**. Built as a hands-on data engineering learning project.
 
