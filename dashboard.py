@@ -32,8 +32,20 @@ min_date, max_date = con.execute("""
     SELECT MIN(played_date), MAX(played_date) FROM stg_scrobbles
 """).fetchone()
 
+if "date_range" not in st.session_state:
+    st.session_state["date_range"] = (min_date, max_date)
+ 
+st.sidebar.caption("Quick select")
+quick_col1, quick_col2, quick_col3 = st.sidebar.columns(3)
+if quick_col1.button("Last week", use_container_width=True):
+    st.session_state["date_range"] = (max(min_date, max_date - relativedelta(weeks=1)), max_date)
+if quick_col2.button("Last month", use_container_width=True):
+    st.session_state["date_range"] = (max(min_date, max_date - relativedelta(months=1)), max_date)
+if quick_col3.button("Last year", use_container_width=True):
+    st.session_state["date_range"] = (max(min_date, max_date - relativedelta(years=1)), max_date)
+
 date_range = st.sidebar.date_input(
-    "Timespan",
+    "Time range",
     value=(min_date, max_date),
     min_value=min_date,
     max_value=max_date
@@ -112,27 +124,6 @@ with st.container(border=True):
 
     with col2:
         st.header("Top tracks")
-
-        track_period = st.radio(
-            "Time range",
-            ["Last week", "Last month", "Last year", "Selected time range"],
-            index=3,
-            horizontal=True,
-            label_visibility="collapsed",
-        )
- 
-        if track_period == "Last week":
-            track_start_date = max(min_date, max_date - relativedelta(weeks=1))
-            track_end_date = max_date
-        elif track_period == "Last month":
-            track_start_date = max(min_date, max_date - relativedelta(months=1))
-            track_end_date = max_date
-        elif track_period == "Last year":
-            track_start_date = max(min_date, max_date - relativedelta(years=1))
-            track_end_date = max_date
-        else:
-            track_start_date, track_end_date = start_date, end_date
-
         st.dataframe(top_tracks, use_container_width=True)
 
 # --- Listening Activity ---
