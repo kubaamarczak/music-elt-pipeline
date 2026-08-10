@@ -1,6 +1,7 @@
 import duckdb
 import plotly.express as px
 import streamlit as st
+from dateutil.relativedelta import relativedelta
 from huggingface_hub import hf_hub_download
 
 
@@ -111,6 +112,27 @@ with st.container(border=True):
 
     with col2:
         st.header("Top tracks")
+
+        track_period = st.radio(
+            "Time range",
+            ["Last week", "Last month", "Last year", "Selected time range"],
+            index=3,
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+ 
+        if track_period == "Last week":
+            track_start_date = max(min_date, max_date - relativedelta(weeks=1))
+            track_end_date = max_date
+        elif track_period == "Last month":
+            track_start_date = max(min_date, max_date - relativedelta(months=1))
+            track_end_date = max_date
+        elif track_period == "Last year":
+            track_start_date = max(min_date, max_date - relativedelta(years=1))
+            track_end_date = max_date
+        else:
+            track_start_date, track_end_date = start_date, end_date
+
         st.dataframe(top_tracks, use_container_width=True)
 
 # --- Listening Activity ---
