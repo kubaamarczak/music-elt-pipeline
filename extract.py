@@ -11,16 +11,6 @@ API_KEY = os.getenv("LASTFM_API_KEY")
 USERNAME = os.getenv("LASTFM_USERNAME")
 BASE_URL = "https://ws.audioscrobbler.com/2.0/"
 
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-API_KEY = os.getenv("LASTFM_API_KEY")
-USERNAME = os.getenv("LASTFM_USERNAME")
-BASE_URL = "https://ws.audioscrobbler.com/2.0/"
-
 def fetch_page(page: int, limit: int = 200, from_ts: int | None = None):
     params = {
         "method": "user.getrecenttracks",
