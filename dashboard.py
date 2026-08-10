@@ -1,8 +1,7 @@
-import os
-
 import duckdb
 import plotly.express as px
 import streamlit as st
+import os
 
 
 LOCAL_DB_PATH = os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb")
