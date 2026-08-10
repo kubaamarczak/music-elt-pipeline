@@ -1,6 +1,8 @@
 from datetime import timedelta
+
 import pendulum
 from airflow.operators.bash import BashOperator
+
 from airflow import DAG
 
 PROJECT_DIR = "/opt/music-etl-project"
