@@ -6,7 +6,7 @@ import streamlit as st
 
 LOCAL_DB_PATH = os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb")
 
-@st.cache_resource(show_spinner="Loading database…", ttl="1h")
+@st.cache_resource(show_spinner="Loading database…", ttl="10m")
 def get_connection():
     if os.path.exists(LOCAL_DB_PATH):
      return duckdb.connect(LOCAL_DB_PATH, read_only=True)
@@ -18,6 +18,7 @@ def get_connection():
         repo_type="dataset",
         filename="music_pipeline.duckdb",
         token=st.secrets["HF_TOKEN"],
+        force_download=True,
     )
     return duckdb.connect(db_path, read_only=True)
 

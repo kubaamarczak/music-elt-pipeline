@@ -49,7 +49,7 @@ with DAG(
         bash_command=(
             'if [ -z "$HF_TOKEN" ] || [ -z "$HF_REPO_ID" ]; then '
             'echo "HF_TOKEN/HF_REPO_ID nicht gesetzt -- Hugging-Face-Upload wird '
-            'uebersprungen (nur fuer eigenes Public-Deployment noetig, siehe SETUP_HF.md)."; '
+            'uebersprungen (nur fuer eigenes Public-Deployment noetig)."; '
             "exit 0; "
             "fi && "
             f"pip install huggingface_hub python-dotenv --quiet && "
