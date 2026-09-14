@@ -96,22 +96,7 @@ fig = px.bar(
 )
 fig.update_layout(yaxis={"categoryorder": "total ascending"})
 
-# --- Top Tracks ---
-top_tracks = con.execute(f"""
-    SELECT 
-        track_name  AS "Track",
-        artist_name AS "Artist",
-        COUNT(*)    AS "Plays"
-    FROM stg_scrobbles
-    WHERE played_date BETWEEN '{start_date}' AND '{end_date}'
-    GROUP BY track_name, artist_name
-    ORDER BY "Plays" DESC
-    LIMIT 50
-""").fetchdf()
-top_tracks.index = top_tracks.index + 1
-
-top_tracks["Share"] = (top_tracks["Plays"] / total_plays * 100) if total_plays else 0.0
-
+# --- Top Tracks / Top Albums ---
 with st.container(border=True): 
     col1, col2 = st.columns(2)
     with col1:
@@ -119,14 +104,49 @@ with st.container(border=True):
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.header("Top tracks")
-        st.dataframe(
-            top_tracks,
-            use_container_width=True,
-            column_config={
-                "Share": st.column_config.NumberColumn("Share", format="%.1f%%"),
-            },
+        header_placeholder = st.empty()
+
+        view_type = st.radio(
+            "",
+            ["Top tracks", "Top albums"],
+            horizontal=True,
+            label_visibility="collapsed"
         )
+
+        header_placeholder.header(view_type)   
+
+        if view_type == "Top tracks":
+            data = con.execute(f"""
+                SELECT 
+                    track_name  AS "Track",
+                    artist_name AS "Artist",
+                    COUNT(*)    AS "Plays"
+                FROM stg_scrobbles
+                WHERE played_date BETWEEN '{start_date}' AND '{end_date}'
+                GROUP BY track_name, artist_name
+                ORDER BY "Plays" DESC
+                LIMIT 20
+            """).fetchdf()
+            data.index = data.index + 1
+            st.dataframe(data, use_container_width=True)
+
+        else:
+            st.caption("Album data recorded from 29/06/2026 onwards")
+            data = con.execute(f"""
+                SELECT 
+                    album_name  AS "Album",
+                    artist_name AS "Artist",
+                    COUNT(*)    AS "Plays"
+                FROM stg_scrobbles
+                WHERE played_date BETWEEN '{start_date}' AND '{end_date}'
+                AND album_name IS NOT NULL
+                AND source = 'lastfm'
+                GROUP BY album_name, artist_name
+                ORDER BY "Plays" DESC
+                LIMIT 20
+            """).fetchdf()
+            data.index = data.index + 1
+            st.dataframe(data, use_container_width=True)
 
 # --- Listening Activity ---
 with st.container(border=True): 
@@ -134,7 +154,8 @@ with st.container(border=True):
     chart_type = st.radio(
         "Diagram type",
         ["Bar chart", "Line chart"],
-        horizontal=True
+        horizontal=True,
+        label_visibility="collapsed"
     )
 
     activity = con.execute(f"""
