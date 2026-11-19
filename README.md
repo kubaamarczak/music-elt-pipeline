@@ -7,7 +7,7 @@
 ![dbt](https://img.shields.io/badge/dbt-FF694B?logo=dbt&logoColor=white)
 ![Last.fm](https://img.shields.io/badge/Last.fm-D51007?logo=lastdotfm&logoColor=white)
 
-A personal ELT pipeline that collects, transforms, and visualizes my music listening history from **Last.fm** and **Spotify**. Built as a hands-on data engineering learning project.
+A personal ELT pipeline that collects, transforms, predicts and visualizes my music listening history from **Last.fm** and **Spotify**. Built as a hands-on data engineering learning project.
 
 > [![streamlit app](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://kubaamarczak-music-elt-pipeline-dashboard.streamlit.app)
 
@@ -45,6 +45,9 @@ Last.fm API (daily incremental)         Spotify Export (one-time historical)
                                   listening_duration
                             |
                             v
+                        forecast.py
+                            |
+                            v
                    Streamlit Dashboard
                             ^
                             |
@@ -62,6 +65,7 @@ Last.fm API (daily incremental)         Spotify Export (one-time historical)
 | Load | Python + DuckDB | Raw data storage |
 | Transform | dbt + DuckDB | Staging & mart models |
 | Orchestration | Apache Airflow | Daily scheduling via Docker |
+| Prediction | Python + statsmodels | Forecasting next 7 days |
 | Visualization | Streamlit + Plotly | Interactive dashboard |
 
 ---
@@ -190,6 +194,7 @@ Then open [http://localhost:8080](http://localhost:8080) (login: `airflow` / `ai
 - **dbt source testing** — `not_null` and `unique` tests on staging models
 - **Multi-source integration** — Combining API data (Last.fm) with file exports (Spotify)
 - **Orchestration** — Dockerized Airflow DAG with task dependencies
+- **Forecasting** - NegBin model for time-series count data
 
 ## Additional footage
 ![artist popularity](assets/artist_popularity.gif)
