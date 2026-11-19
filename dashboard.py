@@ -8,13 +8,14 @@ import streamlit as st
 
 LOCAL_DB_PATH = os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb")
 
+
 @st.cache_resource(show_spinner="Loading database…", ttl="10m")
 def get_connection():
     if os.path.exists(LOCAL_DB_PATH):
-     return duckdb.connect(LOCAL_DB_PATH, read_only=True)
+        return duckdb.connect(LOCAL_DB_PATH, read_only=True)
 
     from huggingface_hub import hf_hub_download
-    
+
     db_path = hf_hub_download(
         repo_id=st.secrets["HF_REPO_ID"],
         repo_type="dataset",
@@ -23,6 +24,7 @@ def get_connection():
         force_download=True,
     )
     return duckdb.connect(db_path, read_only=True)
+
 
 con = get_connection()
 
@@ -42,10 +44,7 @@ min_date, max_date = con.execute("""
 """).fetchone()
 
 date_range = st.sidebar.date_input(
-    "Time range",
-    value=(min_date, max_date),
-    min_value=min_date,
-    max_value=max_date
+    "Time range", value=(min_date, max_date), min_value=min_date, max_value=max_date
 )
 
 if len(date_range) == 2:
@@ -54,7 +53,8 @@ else:
     start_date, end_date = min_date, max_date
 
 # --- KPIs ---
-kpis = con.execute(f"""
+kpis = con.execute(
+    """
     SELECT
         COUNT(*)                                                                AS total_plays,
         COUNT(DISTINCT artist_key)                                              AS unique_artists,
@@ -64,12 +64,15 @@ kpis = con.execute(f"""
         ROUND(COUNT(*) / ((CAST(? AS DATE) - CAST(? AS DATE) + 1) / 30.44), 1)  AS avg_per_month
     FROM stg_scrobbles
     WHERE played_date BETWEEN ? AND ?
-""", [end_date, start_date, end_date, start_date, start_date, end_date]).fetchone()
+""",
+    [end_date, start_date, end_date, start_date, start_date, end_date],
+).fetchone()
 
-total_plays, unique_artists, unique_tracks, active_days, avg_per_day, avg_per_month = kpis
+total_plays, unique_artists, unique_tracks, active_days, avg_per_day, avg_per_month = (
+    kpis
+)
 
-with st.container(border=True): 
-
+with st.container(border=True):
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
     col1.metric("Total plays", f"{total_plays:,}")
@@ -94,12 +97,12 @@ fig = px.bar(
     x="play_count",
     y="artist_name",
     orientation="h",
-    labels={"play_count": "Plays", "artist_name": "Artist"}
+    labels={"play_count": "Plays", "artist_name": "Artist"},
 )
 fig.update_layout(yaxis={"categoryorder": "total ascending"})
 
 # --- Top Tracks / Top Albums ---
-with st.container(border=True): 
+with st.container(border=True):
     col1, col2 = st.columns(2)
     with col1:
         st.header("Top artists")
@@ -112,10 +115,10 @@ with st.container(border=True):
             "",
             ["Top tracks", "Top albums"],
             horizontal=True,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
         )
 
-        header_placeholder.header(view_type)   
+        header_placeholder.header(view_type)
 
         if view_type == "Top tracks":
             data = con.execute(f"""
@@ -151,10 +154,11 @@ with st.container(border=True):
             st.dataframe(data, use_container_width=True)
 
 # --- Listening Activity ---
-with st.container(border=True): 
+with st.container(border=True):
     st.header("Listening activity")
 
-    activity = con.execute(""" 
+    activity = con.execute(
+        """ 
         WITH calendar AS (
             SELECT CAST(d AS DATE) AS played_date
             FROM generate_series(CAST(? AS DATE) - INTERVAL 7 DAY,
@@ -180,9 +184,13 @@ with st.container(border=True):
         FROM filled
         QUALIFY played_date >= CAST(? AS DATE)
         ORDER BY played_date
-    """, [start_date, end_date, start_date]).fetchdf()
+    """,
+        [start_date, end_date, start_date],
+    ).fetchdf()
 
-    played_last_day, played_last_week  = activity[["played_last_day", "played_last_week"]].iloc[-1]
+    played_last_day, played_last_week = activity[
+        ["played_last_day", "played_last_week"]
+    ].iloc[-1]
 
     with st.container(border=True):
         col1, col2 = st.columns(2)
@@ -194,7 +202,7 @@ with st.container(border=True):
         "Diagram type",
         ["Bar chart", "Line chart"],
         horizontal=True,
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
 
     if chart_type == "Bar chart":
@@ -204,7 +212,17 @@ with st.container(border=True):
             y="play_count",
             labels={"played_date": "Date", "play_count": "Played tracks"},
             color="Day",
-            category_orders={"Day": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+            category_orders={
+                "Day": [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday",
+                ]
+            },
         )
     else:
         fig = px.line(
@@ -212,22 +230,24 @@ with st.container(border=True):
             x="played_date",
             y="play_count",
             labels={"played_date": "Date", "play_count": "Played tracks"},
-            markers=False
+            markers=False,
         )
         import plotly.graph_objects as go
 
-        fig.add_trace(go.Scatter(
-            x=[None],
-            y=[None],
-            mode="markers",
-            marker={"color": "rgba(0,0,0,0)"},  # unsichtbar
-            showlegend=True,
-            name=" "  # leerer Name
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="markers",
+                marker={"color": "rgba(0,0,0,0)"},  # unsichtbar
+                showlegend=True,
+                name=" ",  # leerer Name
+            )
+        )
     st.plotly_chart(fig, use_container_width=True)
 
 # --- Prediction: next 7 days ---
-with st.container(border=True): 
+with st.container(border=True):
     st.header("Prediction: next 7 days")
 
     try:
@@ -236,7 +256,7 @@ with st.container(border=True):
             WHERE run_date = (SELECT MAX(run_date) FROM forecast_daily)
             ORDER BY target_date
         """).fetchdf()
-    except duckdb.CatalogException:      # handling missing table
+    except duckdb.CatalogException:  # handling missing table
         fc = pd.DataFrame()
 
     if fc.empty:
@@ -245,12 +265,15 @@ with st.container(border=True):
         train_end = pd.Timestamp(fc["train_end"].iloc[0]).normalize()
         start = train_end - pd.Timedelta(weeks=8) + pd.Timedelta(days=1)
 
-        hist = con.execute("""
+        hist = con.execute(
+            """
             SELECT CAST(played_date AS DATE) AS d, COUNT(*) AS plays
             FROM stg_scrobbles
             WHERE CAST(played_date AS DATE) BETWEEN ? AND ?
             GROUP BY d
-        """, [start.date(), train_end.date()]).fetchdf()
+        """,
+            [start.date(), train_end.date()],
+        ).fetchdf()
 
         # days w/o plays are 0 plays
         days = pd.date_range(start, train_end, freq="D")
@@ -263,28 +286,37 @@ with st.container(border=True):
             first = fc.iloc[0]
             col1, col2 = st.columns(2)
             col1.metric(
-                f"Expected plays for {first['target_date'].strftime("%d/%m/%Y")}",
+                f"Expected plays for {first['target_date'].strftime('%d/%m/%Y')}",
                 f"{first['mu']:.0f} Plays",
             )
             col2.metric(
-                f"80-%-interval for {first['target_date'].strftime("%d/%m/%Y")}",
+                f"80-%-interval for {first['target_date'].strftime('%d/%m/%Y')}",
                 f"{first['lo']:.0f} - {first['hi']:.0f} Plays",
             )
 
         fig = go.Figure()
-        fig.add_trace(go.Bar(x=hist.index, y=hist["plays"], name="is", marker_color="#2979ff"))
-        fig.add_trace(go.Scatter(
-            x=fc["target_date"], y=fc["mu"], mode="markers", name="expected",
-            marker={"color": "#ff9100", "size": 9},
-            error_y={
-                "type": "data", "symmetric": False,
-                "array": (fc["hi"] - fc["mu"]).tolist(),
-                "arrayminus": (fc["mu"] - fc["lo"]).tolist(),
-                "color": "#ff9100",
-            },
-        ))
+        fig.add_trace(
+            go.Bar(x=hist.index, y=hist["plays"], name="is", marker_color="#2979ff")
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=fc["target_date"],
+                y=fc["mu"],
+                mode="markers",
+                name="expected",
+                marker={"color": "#ff9100", "size": 9},
+                error_y={
+                    "type": "data",
+                    "symmetric": False,
+                    "array": (fc["hi"] - fc["mu"]).tolist(),
+                    "arrayminus": (fc["mu"] - fc["lo"]).tolist(),
+                    "color": "#ff9100",
+                },
+            )
+        )
         fig.update_layout(
-            xaxis_title="date", yaxis_title="plays",
+            xaxis_title="date",
+            yaxis_title="plays",
             legend={"orientation": "h", "y": 1.1},
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -298,7 +330,7 @@ with st.container(border=True):
         )
 
 # --- Heatmap: Wochentag × Uhrzeit ---
-with st.container(border=True): 
+with st.container(border=True):
     st.header("When do you listen to music?")
 
     heatmap_data = con.execute(f"""
@@ -314,14 +346,19 @@ with st.container(border=True):
 
     # Pivot: Zeilen = Wochentage, Spalten = Stunden
     heatmap_pivot = heatmap_data.pivot_table(
-        index="day_of_week",
-        columns="hour_of_day",
-        values="play_count",
-        fill_value=0
+        index="day_of_week", columns="hour_of_day", values="play_count", fill_value=0
     )
 
     # Wochentage in richtiger Reihenfolge
-    day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    day_order = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
     heatmap_pivot = heatmap_pivot.reindex(
         index=day_order, columns=range(24), fill_value=0
     )
@@ -330,34 +367,38 @@ with st.container(border=True):
         heatmap_pivot,
         labels={"x": "Time", "y": "Day", "color": "Plays"},
         color_continuous_scale=["#0f1117", "#131386", "#3b3bd7", "#2979ff", "#64b5f6"],
-        aspect="equal"
+        aspect="equal",
     )
     fig3.update_xaxes(
-        tickvals=list(range(24)),
-        ticktext=[f"{h:02d}:00" for h in range(24)]
+        tickvals=list(range(24)), ticktext=[f"{h:02d}:00" for h in range(24)]
     )
     st.plotly_chart(fig3, use_container_width=True)
 
 # --- Artist Popularität über Zeit ---
-with st.container(border=True): 
+with st.container(border=True):
     st.header("Artist popularity over time")
 
     # Top N Artists auswählen
     top_n = st.slider("Amount of artists", min_value=3, max_value=15, value=5)
 
     # Top Artists im gewählten Zeitraum bestimmen
-    top_artists_list = con.execute(f"""
+    top_artists_list = (
+        con.execute(f"""
         SELECT artist_name
         FROM stg_scrobbles
         WHERE played_date BETWEEN '{start_date}' AND '{end_date}'
         GROUP BY artist_name
         ORDER BY COUNT(*) DESC
         LIMIT {top_n}
-    """).fetchdf()["artist_name"].tolist()
+    """)
+        .fetchdf()["artist_name"]
+        .tolist()
+    )
 
     # Monatliche Plays pro Artist
-    placeholders = ','.join(['?' for _ in top_artists_list])
-    artist_trend = con.execute(f"""
+    placeholders = ",".join(["?" for _ in top_artists_list])
+    artist_trend = con.execute(
+        f"""
         SELECT
             DATE_TRUNC('month', played_at)  AS month,
             artist_name,
@@ -367,24 +408,22 @@ with st.container(border=True):
         AND artist_name IN ({placeholders})
         GROUP BY month, artist_name
         ORDER BY month
-    """, top_artists_list).fetchdf()
+    """,
+        top_artists_list,
+    ).fetchdf()
 
     fig4 = px.line(
         artist_trend,
         x="month",
         y="play_count",
         color="artist_name",
-        labels={
-            "month": "Month",
-            "play_count": "Plays",
-            "artist_name": "Artist"
-        },
-        markers=False
+        labels={"month": "Month", "play_count": "Plays", "artist_name": "Artist"},
+        markers=False,
     )
     st.plotly_chart(fig4, use_container_width=True)
 
 # --- Bar Chart Race ---
-with st.container(border=True): 
+with st.container(border=True):
     st.header("Top artists over time")
 
     top_n_race = st.slider("Amount of artists", min_value=3, max_value=10, value=5)
@@ -435,8 +474,12 @@ with st.container(border=True):
     """).fetchdf()
 
     # Top N Artists insgesamt bestimmen
-    top_artists_race = race_data.groupby("artist_name")["cumulative_plays"].max() \
-        .nlargest(top_n_race).index.tolist()
+    top_artists_race = (
+        race_data.groupby("artist_name")["cumulative_plays"]
+        .max()
+        .nlargest(top_n_race)
+        .index.tolist()
+    )
 
     race_data = race_data[race_data["artist_name"].isin(top_artists_race)]
 
@@ -445,22 +488,25 @@ with st.container(border=True):
     frames = []
 
     for month in months:
-        frame_data = race_data[race_data["month"] == month] \
-            .sort_values("cumulative_plays", ascending=True)
-    
-        frames.append({
-            "data": [{
-                "type": "bar",
-                "orientation": "h",
-                "x": frame_data["cumulative_plays"].tolist(),
-                "y": frame_data["artist_name"].tolist(),
-                "marker": {"color": "#2979ff"}
-            }],
-            "name": str(month)[:7],
-            "layout": {
-                "title": {"text": f"Cumulative plays – {str(month)[:7]}"}
+        frame_data = race_data[race_data["month"] == month].sort_values(
+            "cumulative_plays", ascending=True
+        )
+
+        frames.append(
+            {
+                "data": [
+                    {
+                        "type": "bar",
+                        "orientation": "h",
+                        "x": frame_data["cumulative_plays"].tolist(),
+                        "y": frame_data["artist_name"].tolist(),
+                        "marker": {"color": "#2979ff"},
+                    }
+                ],
+                "name": str(month)[:7],
+                "layout": {"title": {"text": f"Cumulative plays – {str(month)[:7]}"}},
             }
-        })
+        )
 
     max_plays = race_data["cumulative_plays"].max()
 
@@ -471,42 +517,54 @@ with st.container(border=True):
             xaxis={"title": "Cumulative plays", "range": [0, max_plays * 1.15]},
             yaxis={"title": "Artist"},
             height=400,
-            updatemenus=[{
-                "type": "buttons",
-                "showactive": False,
-                "buttons": [
-                    {
-                        "label": "▶",
-                        "method": "animate",
-                        "args": [None, {
-                            "frame": {"duration": 800, "redraw": True},
-                            "fromcurrent": True,
-                            "transition": {"duration": 600}
-                        }]
-                    },
-                    {
-                        "label": "⏸",
-                        "method": "animate",
-                        "args": [[None], {
-                            "frame": {"duration": 0},
-                            "mode": "immediate"
-                        }]
-                    }
-                ]
-            }],
-            sliders=[{
-                "steps": [
-                    {
-                        "method": "animate",
-                        "args": [[f["name"]], {"frame": {"duration": 800}, "mode": "immediate"}],
-                        "label": f["name"]
-                    }
-                    for f in frames
-                ],
-                "currentvalue": {"prefix": "Month: "}
-            }]
+            updatemenus=[
+                {
+                    "type": "buttons",
+                    "showactive": False,
+                    "buttons": [
+                        {
+                            "label": "▶",
+                            "method": "animate",
+                            "args": [
+                                None,
+                                {
+                                    "frame": {"duration": 800, "redraw": True},
+                                    "fromcurrent": True,
+                                    "transition": {"duration": 600},
+                                },
+                            ],
+                        },
+                        {
+                            "label": "⏸",
+                            "method": "animate",
+                            "args": [
+                                [None],
+                                {"frame": {"duration": 0}, "mode": "immediate"},
+                            ],
+                        },
+                    ],
+                }
+            ],
+            sliders=[
+                {
+                    "steps": [
+                        {
+                            "method": "animate",
+                            "args": [
+                                [f["name"]],
+                                {"frame": {"duration": 800}, "mode": "immediate"},
+                            ],
+                            "label": f["name"],
+                        }
+                        for f in frames
+                    ],
+                    "currentvalue": {"prefix": "Month: "},
+                }
+            ],
         ),
-        frames=[go.Frame(data=f["data"], name=f["name"], layout=f["layout"]) for f in frames]
+        frames=[
+            go.Frame(data=f["data"], name=f["name"], layout=f["layout"]) for f in frames
+        ],
     )
 
     st.plotly_chart(fig5, use_container_width=True)
