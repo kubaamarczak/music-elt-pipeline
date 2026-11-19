@@ -9,7 +9,7 @@
 
 A personal ELT pipeline that collects, transforms, and visualizes my music listening history from **Last.fm** and **Spotify**. Built as a hands-on data engineering learning project.
 
-> [![streamlit app](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://kubaamarczak-music-elt-pipeline-dashboard-p8nfbw.streamlit.app)
+> [![streamlit app](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://kubaamarczak-music-elt-pipeline-dashboard.streamlit.app)
 
 ---
 

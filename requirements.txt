@@ -5,7 +5,9 @@ certifi==2026.7.22
 charset-normalizer==3.5.2
 click==8.5.0
 cloudpickle==3.1.2
+dbt==2.0.12
 distro==1.9.0
+duckdb==2.0.0
 filelock==3.32.6
 fsspec==2026.7.0
 google-crc32c==1.9.0
@@ -42,6 +44,7 @@ scikit-learn==1.9.0
 scipy==1.17.1
 six==1.17.0
 sseclient-py==1.9.0
+streamlit==1.67.0
 tabpfn-client==0.7.0
 tabpfn-common-utils==0.2.23
 threadpoolctl==3.7.0
