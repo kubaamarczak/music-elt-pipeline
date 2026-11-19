@@ -45,7 +45,10 @@ Last.fm API (daily incremental)         Spotify Export (one-time historical)
                                   listening_duration
                             |
                             v
-                        forecast.py
+                       forecast.py
+                            |
+                            v
+                      forecast_daily
                             |
                             v
                    Streamlit Dashboard
