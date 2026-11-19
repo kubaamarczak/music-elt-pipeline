@@ -28,6 +28,7 @@ packaging==26.3
 pandas==2.3.3
 password-strength==0.0.3.post2
 platformdirs==4.14.2
+plotly==7.1.0
 posthog==7.81.1
 pyarrow==25.0.1
 pydantic==2.14.1
