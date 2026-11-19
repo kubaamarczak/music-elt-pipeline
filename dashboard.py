@@ -82,7 +82,7 @@ with st.container(border=True):
     col5.metric("⌀ Tracks / Day", f"{avg_per_day:,}")
     col6.metric("⌀ Tracks / Month", f"{avg_per_month:,}")
 
-# --- Top Artists ---
+# --- Top artists ---
 top_artists = con.execute(f"""
     SELECT artist_name, COUNT(*) AS play_count
     FROM stg_scrobbles
@@ -101,7 +101,7 @@ fig = px.bar(
 )
 fig.update_layout(yaxis={"categoryorder": "total ascending"})
 
-# --- Top Tracks / Top Albums ---
+# --- Top tracks / Top albums ---
 with st.container(border=True):
     col1, col2 = st.columns(2)
     with col1:
@@ -153,7 +153,7 @@ with st.container(border=True):
             data.index = data.index + 1
             st.dataframe(data, use_container_width=True)
 
-# --- Listening Activity ---
+# --- Listening activity ---
 with st.container(border=True):
     st.header("Listening activity")
 
@@ -239,9 +239,9 @@ with st.container(border=True):
                 x=[None],
                 y=[None],
                 mode="markers",
-                marker={"color": "rgba(0,0,0,0)"},  # unsichtbar
+                marker={"color": "rgba(0,0,0,0)"},  # invisible
                 showlegend=True,
-                name=" ",  # leerer Name
+                name=" ",  # empty name
             )
         )
     st.plotly_chart(fig, use_container_width=True)
@@ -329,7 +329,7 @@ with st.container(border=True):
             f"At approx. {zero_rate:.0%} of the days no music is listened to."
         )
 
-# --- Heatmap: Wochentag × Uhrzeit ---
+# --- Heatmap: Weekday × Hour ---
 with st.container(border=True):
     st.header("When do you listen to music?")
 
@@ -344,12 +344,11 @@ with st.container(border=True):
         ORDER BY hour_of_day
     """).fetchdf()
 
-    # Pivot: Zeilen = Wochentage, Spalten = Stunden
+    # Pivot: Rows = Weekdays, Columns = Hours
     heatmap_pivot = heatmap_data.pivot_table(
         index="day_of_week", columns="hour_of_day", values="play_count", fill_value=0
     )
 
-    # Wochentage in richtiger Reihenfolge
     day_order = [
         "Monday",
         "Tuesday",
@@ -374,14 +373,14 @@ with st.container(border=True):
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-# --- Artist Popularität über Zeit ---
+# --- Artist popularity over time ---
 with st.container(border=True):
     st.header("Artist popularity over time")
 
-    # Top N Artists auswählen
+    # Top N artists
     top_n = st.slider("Amount of artists", min_value=3, max_value=15, value=5)
 
-    # Top Artists im gewählten Zeitraum bestimmen
+    # Top artists in selected timeframe
     top_artists_list = (
         con.execute(f"""
         SELECT artist_name
@@ -395,7 +394,7 @@ with st.container(border=True):
         .tolist()
     )
 
-    # Monatliche Plays pro Artist
+    # Monthly plays per artist
     placeholders = ",".join(["?" for _ in top_artists_list])
     artist_trend = con.execute(
         f"""
@@ -428,7 +427,7 @@ with st.container(border=True):
 
     top_n_race = st.slider("Amount of artists", min_value=3, max_value=10, value=5)
 
-    # Monatliche kumulierte Plays pro Artist
+    # Monthly cumulated plays per artist
     race_data = con.execute(f"""
         WITH monthly AS (
             SELECT
@@ -473,7 +472,7 @@ with st.container(border=True):
         ORDER BY month, cumulative_plays DESC
     """).fetchdf()
 
-    # Top N Artists insgesamt bestimmen
+    # Top N artists in total
     top_artists_race = (
         race_data.groupby("artist_name")["cumulative_plays"]
         .max()

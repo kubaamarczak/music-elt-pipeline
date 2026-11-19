@@ -17,7 +17,7 @@ con.execute("""
     )
 """)
 
-# Prüfen ob Tabelle überhaupt schon existiert
+# check if a table exists
 table_exists = con.execute("""
     SELECT COUNT(*) FROM information_schema.tables 
     WHERE table_name = 'raw_scrobbles'
@@ -26,16 +26,16 @@ table_exists = con.execute("""
 if table_exists:
     result = con.execute("SELECT MAX(played_at_ts) FROM raw_scrobbles").fetchone()
     last_ts = result[0]
-    print(f"Letzter bekannter Timestamp: {last_ts} – hole nur neuere Scrobbles")
+    print(f"Last known timestamp: {last_ts} – get new scrobbles only")
 else:
     last_ts = None
-    print("Tabelle existiert noch nicht – lade alles")
+    print("Table doesn't exist – load everything")
 
 with open(os.path.join(os.path.dirname(__file__), "raw_scrobbles.json"), "r") as f:
     tracks = json.load(f)
 
 if not tracks:
-    print("Keine neuen Tracks")
+    print("No new tracks")
     con.close()
     sys.exit()
 
@@ -69,6 +69,6 @@ else:
     """, [json.dumps(tracks)])
 
 count = con.execute("SELECT COUNT(*) FROM raw_scrobbles").fetchone()[0]
-print(f"Fertig – Tabelle hat jetzt {count} Rows")
+print(f"Finished – table has {count} rows now")
 
 con.close()

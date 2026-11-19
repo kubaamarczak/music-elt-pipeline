@@ -353,7 +353,7 @@ print("95%-CI:", np.percentile(boot, [2.5, 97.5]))
 print("amount resamples advantage arima:", (boot > 0).mean())
 
 
-# saturday arima no AR(p)
+# saturday arima AR(1)
 start = len(activity) - 280
 preds_ar1 = {}
 for t in range(start, len(activity)):
@@ -382,7 +382,7 @@ print("95%-CI:", np.percentile(boot, [2.5, 97.5]))
 print("amount resamples advantage arima:", (boot > 0).mean())
 
 
-# saturday arima no AR(p)
+# saturday arima AR(2)
 start = len(activity) - 280
 preds_ar2 = {}
 for t in range(start, len(activity)):
@@ -481,7 +481,7 @@ for i, (train_index, test_index) in enumerate(tscv.split(activity["played_date"]
     lo_folds2.append(lo)
     hi_folds2.append(hi)
 
-# Erwartungswert aus n und p zurückrechnen: mu = n * (1 - p) / p
+# E => mu = n * (1 - p) / p
 mu_all = np.concatenate(
     [
         n_i * (1 - p_i.to_numpy()) / p_i.to_numpy()
