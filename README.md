@@ -73,6 +73,8 @@ music-etl-project/
 ├── extract.py               # Last.fm API extract (incremental)
 ├── load_to_duckdb.py        # Load raw scrobbles into DuckDB
 ├── load_spotify.py          # One-time Spotify history load
+├── forecast_build.py        # Model development
+├── forecast.py              # Prediction model based on weekday
 ├── dashboard.py             # Streamlit dashboard
 ├── music_transform/         # dbt project
 │   ├── models/
@@ -148,8 +150,11 @@ python load_spotify.py
 cd music_transform
 dbt run
 
-# Start the dashboard
+# Forecast for the next 7 days (writes forecast_daily)
 cd ..
+python forecast.py
+
+# Start the dashboard
 streamlit run dashboard.py
 ```
 
