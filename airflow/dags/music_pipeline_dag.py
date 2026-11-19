@@ -44,17 +44,16 @@ with DAG(
         append_env=True,
     )
 
-    upload = BashOperator(
-        task_id="upload_to_hf",
-        bash_command=(
-            'if [ -z "$HF_TOKEN" ] || [ -z "$HF_REPO_ID" ]; then '
-            'echo "HF_TOKEN/HF_REPO_ID nicht gesetzt -- Hugging-Face-Upload wird '
-            'uebersprungen (nur fuer eigenes Public-Deployment noetig)."; '
-            "exit 0; "
-            "fi && "
-            f"pip install huggingface_hub python-dotenv --quiet && "
-            f"cd {PROJECT_DIR} && python upload_db_to_hf.py"
-        ),
+    forecast = BashOperator(
+        task_id="forecast",
+        bash_command=f"pip install pandas numpy scipy statsmodels duckdb --quiet && cd {PROJECT_DIR} && python forecast.py",
     )
 
-    extract >> load >> transform >> upload
+    upload = BashOperator(
+        task_id="upload",
+        bash_command=f"pip install huggingface_hub python-dotenv --quiet && cd {PROJECT_DIR} && python upload_db_to_hf.py",
+        env={"HF_TOKEN": "{{ var.value.HF_TOKEN }}", "HF_REPO_ID": "55kubaa/music-pipeline-db"},
+        append_env=True,
+    )
+
+    extract >> load >> transform >> forecast >> upload

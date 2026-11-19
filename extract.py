@@ -35,12 +35,12 @@ def fetch_all_scrobbles(limit_per_page: int = 200, pause_seconds: float = 0.25, 
     total_pages = int(attrs["totalPages"])
     total_tracks = int(attrs["total"])
 
-    print(f"Insgesamt {total_tracks} neue Tracks auf {total_pages} Pages")
+    print(f"A total of {total_tracks} new tracks on {total_pages} pages")
 
     all_tracks.extend(first_response["recenttracks"]["track"])
 
     for page in range(2, total_pages + 1):
-        print(f"Lade Page {page}/{total_pages}...")
+        print(f"Load page {page}/{total_pages}...")
         response = fetch_page(page=page, limit=limit_per_page, from_ts=from_ts)
         all_tracks.extend(response["recenttracks"]["track"])
         time.sleep(pause_seconds)
@@ -49,8 +49,8 @@ def fetch_all_scrobbles(limit_per_page: int = 200, pause_seconds: float = 0.25, 
 
 if __name__ == "__main__":
     tracks = fetch_all_scrobbles()
-    print(f"\n{len(tracks)} Tracks insgesamt geladen")
-    print("Beispiel-Track:", tracks[0])
+    print(f"\n{len(tracks)} total of tracks loaded")
+    print("Example-track:", tracks[0])
 
     with open("raw_scrobbles.json", "w") as f:
         json.dump(tracks, f, indent=2)

@@ -1,7 +1,9 @@
 import os
 
 import duckdb
+import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 LOCAL_DB_PATH = os.path.join(os.path.dirname(__file__), "music_pipeline.duckdb")
@@ -54,15 +56,15 @@ else:
 # --- KPIs ---
 kpis = con.execute(f"""
     SELECT
-        COUNT(*)                                                    AS total_plays,
-        COUNT(DISTINCT artist_name)                                 AS unique_artists,
-        COUNT(DISTINCT track_name)                                  AS unique_tracks,
-        COUNT(DISTINCT played_date)                                 AS active_days,
-        ROUND(COUNT(*) / COUNT(DISTINCT played_date), 1)            AS avg_per_day,
-        ROUND(COUNT(*) / COUNT(DISTINCT DATE_TRUNC('month', played_at)), 1) AS avg_per_month
+        COUNT(*)                                                                AS total_plays,
+        COUNT(DISTINCT artist_key)                                              AS unique_artists,
+        COUNT(DISTINCT (artist_key, LOWER(TRIM(track_name))))                   AS unique_tracks,
+        COUNT(DISTINCT played_date)                                             AS active_days,
+        ROUND(COUNT(*) / (CAST(? AS DATE) - CAST(? AS DATE) + 1), 1)            AS avg_per_day,
+        ROUND(COUNT(*) / ((CAST(? AS DATE) - CAST(? AS DATE) + 1) / 30.44), 1)  AS avg_per_month
     FROM stg_scrobbles
-    WHERE played_date BETWEEN '{start_date}' AND '{end_date}'
-""").fetchone()
+    WHERE played_date BETWEEN ? AND ?
+""", [end_date, start_date, end_date, start_date, start_date, end_date]).fetchone()
 
 total_plays, unique_artists, unique_tracks, active_days, avg_per_day, avg_per_month = kpis
 
@@ -151,20 +153,49 @@ with st.container(border=True):
 # --- Listening Activity ---
 with st.container(border=True): 
     st.header("Listening activity")
+
+    activity = con.execute(""" 
+        WITH calendar AS (
+            SELECT CAST(d AS DATE) AS played_date
+            FROM generate_series(CAST(? AS DATE) - INTERVAL 7 DAY,
+                                CAST(? AS DATE),
+                                INTERVAL 1 DAY) AS t(d)
+        ),
+        daily AS (
+            SELECT played_date, COUNT(*) AS play_count
+            FROM stg_scrobbles
+            GROUP BY played_date
+        ),
+        filled AS (
+            SELECT c.played_date,
+                COALESCE(d.play_count, 0) AS play_count
+            FROM calendar c
+            LEFT JOIN daily d USING (played_date)
+        )
+        SELECT played_date,
+           play_count,
+           DAYNAME(played_date) AS "Day",
+           LAG(play_count, 1) OVER (ORDER BY played_date) AS played_last_day,
+           LAG(play_count, 7) OVER (ORDER BY played_date) AS played_last_week
+        FROM filled
+        QUALIFY played_date >= CAST(? AS DATE)
+        ORDER BY played_date
+    """, [start_date, end_date, start_date]).fetchdf()
+
+    played_last_day, played_last_week  = activity[["played_last_day", "played_last_week"]].iloc[-1]
+
+    with st.container(border=True):
+        col1, col2 = st.columns(2)
+
+        col1.metric("Total plays yesterday", f"{played_last_day:,}")
+        col2.metric("Total plays last week same day", f"{played_last_week:,}")
+
     chart_type = st.radio(
         "Diagram type",
         ["Bar chart", "Line chart"],
         horizontal=True,
         label_visibility="collapsed"
     )
-
-    activity = con.execute(f"""
-        SELECT played_date, COUNT(*) AS play_count, DAYNAME(played_date) AS "Day"
-        FROM stg_scrobbles
-        WHERE played_date BETWEEN '{start_date}' AND '{end_date}'
-        GROUP BY played_date
-        ORDER BY played_date
-    """).fetchdf()
 
     if chart_type == "Bar chart":
         fig = px.bar(
@@ -194,6 +225,77 @@ with st.container(border=True):
             name=" "  # leerer Name
         ))
     st.plotly_chart(fig, use_container_width=True)
+
+# --- Prediction: next 7 days ---
+with st.container(border=True): 
+    st.header("Prediction: next 7 days")
+
+    try:
+        fc = con.execute("""
+            SELECT * FROM forecast_daily
+            WHERE run_date = (SELECT MAX(run_date) FROM forecast_daily)
+            ORDER BY target_date
+        """).fetchdf()
+    except duckdb.CatalogException:      # handling missing table
+        fc = pd.DataFrame()
+
+    if fc.empty:
+        st.info("No prediction available.")
+    else:
+        train_end = pd.Timestamp(fc["train_end"].iloc[0]).normalize()
+        start = train_end - pd.Timedelta(weeks=8) + pd.Timedelta(days=1)
+
+        hist = con.execute("""
+            SELECT CAST(played_date AS DATE) AS d, COUNT(*) AS plays
+            FROM stg_scrobbles
+            WHERE CAST(played_date AS DATE) BETWEEN ? AND ?
+            GROUP BY d
+        """, [start.date(), train_end.date()]).fetchdf()
+
+        # days w/o plays are 0 plays
+        days = pd.date_range(start, train_end, freq="D")
+        hist["d"] = pd.to_datetime(hist["d"])
+        hist = hist.set_index("d").reindex(days, fill_value=0)
+
+        fc["target_date"] = pd.to_datetime(fc["target_date"])
+
+        with st.container(border=True):
+            first = fc.iloc[0]
+            col1, col2 = st.columns(2)
+            col1.metric(
+                f"Expected plays for {first['target_date'].strftime("%d/%m/%Y")}",
+                f"{first['mu']:.0f} Plays",
+            )
+            col2.metric(
+                f"80-%-interval for {first['target_date'].strftime("%d/%m/%Y")}",
+                f"{first['lo']:.0f} - {first['hi']:.0f} Plays",
+            )
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=hist.index, y=hist["plays"], name="is", marker_color="#2979ff"))
+        fig.add_trace(go.Scatter(
+            x=fc["target_date"], y=fc["mu"], mode="markers", name="expected",
+            marker={"color": "#ff9100", "size": 9},
+            error_y={
+                "type": "data", "symmetric": False,
+                "array": (fc["hi"] - fc["mu"]).tolist(),
+                "arrayminus": (fc["mu"] - fc["lo"]).tolist(),
+                "color": "#ff9100",
+            },
+        ))
+        fig.update_layout(
+            xaxis_title="date", yaxis_title="plays",
+            legend={"orientation": "h", "y": 1.1},
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        zero_rate = fc["zero_rate"].iloc[0]
+        st.caption(
+            f"Model: negative binomial w/ weekday-effect, trained on {int(fc['n_train'].iloc[0])} days "
+            f"(Until {train_end.date()}). Whiskers show the 80-%-interval per day. "
+            f"The interval is valid for days with play counts over 0. "
+            f"At approx. {zero_rate:.0%} of the days no music is listened to."
+        )
 
 # --- Heatmap: Wochentag × Uhrzeit ---
 with st.container(border=True): 
@@ -359,8 +461,6 @@ with st.container(border=True):
                 "title": {"text": f"Cumulative plays – {str(month)[:7]}"}
             }
         })
-
-    import plotly.graph_objects as go
 
     max_plays = race_data["cumulative_plays"].max()
 
